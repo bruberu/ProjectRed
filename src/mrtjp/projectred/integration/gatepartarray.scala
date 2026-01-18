@@ -57,7 +57,7 @@ trait TArrayGatePart extends RedstoneGatePart with IRedwirePart with TFaceRSProp
 
         if (here == there && (side&6) != (part.side&6)) return 1<<Rotation.rotationTo(side, part.side)
 
-        if (side != part.side) there.move(EnumFacing.getFront(side^1)) //bring corner up to same plane
+        if (side != part.side) there.move(EnumFacing.byIndex(side^1)) //bring corner up to same plane
 
         import codechicken.lib.vec.Rotation._
         (here.getX-there.getX, here.getY-there.getY, here.getZ-there.getZ) match
@@ -78,7 +78,6 @@ trait TArrayGatePart extends RedstoneGatePart with IRedwirePart with TFaceRSProp
         if (getLogicArray.overrideSignal(ipmask))
             return getLogicArray.calculateSignal(ipmask)
 
-        WirePropagator.setDustProvidePower(false)
         WirePropagator.redwiresProvidePower = false
         var s = 0
         def raise(sig:Int){ if (sig > s) s = sig }
@@ -89,7 +88,6 @@ trait TArrayGatePart extends RedstoneGatePart with IRedwirePart with TFaceRSProp
             else if (maskConnectsInside(r)) raise(calcInternalSignal(r))
             else raise(calcMaxSignal(r, false, true))
 
-        WirePropagator.setDustProvidePower(true)
         WirePropagator.redwiresProvidePower = true
         s
     }

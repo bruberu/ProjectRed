@@ -14,20 +14,6 @@ import scala.collection.immutable.HashSet
 
 object WirePropagator
 {
-    private val wiresProvidePower =
-    {
-        try {
-            val c = classOf[BlockRedstoneWire].getDeclaredFields.apply(0)
-            c.setAccessible(true)
-            c
-        }
-        catch {case e:Exception => throw new RuntimeException(e)}
-    }
-    def setDustProvidePower(b:Boolean)
-    {
-        try {wiresProvidePower.setBoolean(Blocks.REDSTONE_WIRE, b)}
-        catch {case t:Throwable =>}
-    }
 
     private val rwConnectable = {val b = new ThreadLocal[Boolean]; b.set(true); b}
     def redwiresConnectable = rwConnectable.get
@@ -37,7 +23,6 @@ object WirePropagator
 
     def reset()
     {
-        setDustProvidePower(true)
         setRedwiresConnectable(true)
         redwiresProvidePower = true
     }

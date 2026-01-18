@@ -103,7 +103,7 @@ class BaseLightPart(factory:LightFactory) extends TMultiPart with TCuboidPart wi
     {
         if (world.isRemote) return false
         if (factory.canFloat) return false
-        val bc = pos.offset(EnumFacing.getFront(getSide))
+        val bc = pos.offset(EnumFacing.byIndex(getSide))
 
         if (!factory.canFloat && !BaseLightPart.canPlaceLight(world, bc, getSide^1)) {
             TileMultipart.dropItem(getItem, world, Vector3.fromTileCenter(tile))
@@ -278,11 +278,11 @@ abstract class LightFactory extends IPartFactory
     final def register()
     {
         item = createItem(false)
-        item.setUnlocalizedName("projectred.illumination."+getUnlocalizedName(false))
+        item.setTranslationKey("projectred.illumination."+getUnlocalizedName(false))
         ForgeRegistries.ITEMS.register(item.setRegistryName(getItemRegistryName(false)))
 
         itemInv = createItem(true)
-        itemInv.setUnlocalizedName("projectred.illumination."+getUnlocalizedName(true))
+        itemInv.setTranslationKey("projectred.illumination."+getUnlocalizedName(true))
         ForgeRegistries.ITEMS.register(itemInv.setRegistryName(getItemRegistryName(true)))
 
         MultiPartRegistry.registerParts(this, Array(getType))

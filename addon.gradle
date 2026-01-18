@@ -1,0 +1,254 @@
+// Apply Scala plugin if not already applied (GregTech buildscript checks wrong location)
+if (!project.plugins.hasPlugin('scala')) {
+    apply plugin: 'scala'
+}
+
+def jarVer = "${project.minecraftVersion}-${project.modVersion}"
+
+// Configure source sets for Project Red's non-standard layout
+sourceSets {
+    main {
+        def root = project.projectDir
+        scala {
+            srcDir new File(root, "src")
+        }
+        resources {
+            srcDir new File(root, "resources")
+        }
+    }
+}
+
+// Configure processResources to expand variables in .info files
+processResources {
+    // Expand variables in all .info files (matching old build.gradle.old behavior)
+    filesMatching('**.info') {
+        expand(
+            'mod_version': modVersion,
+            'mc_version': minecraftVersion,
+            'forge_version': project.ext.config.forge_version,
+            'tjcore_version': project.ext.config.tjpcore_version.replace(".+", ""),  // Note: tjcore in template, tjpcore in properties
+            'ccl_version': project.ext.config.ccl_version.replace(".+", ""),
+            'fmp_version': project.ext.config.fmp_version.replace(".+", "")
+        )
+    }
+}
+
+// Enable experimental features for Scala compiler (required by Project Red)
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.additionalParameters = ["-Xexperimental"]
+    scalaCompileOptions.deprecation = false
+}
+
+// Extension properties for jar versioning
+ext.jarVer = "${minecraftVersion}-${version}"
+ext.baseExcludes = ["**/dan200/**", "**/coloredlightscore/**"]
+
+// Helper to get jar file - will be evaluated lazily
+ext.getJarFile = {
+    zipTree(tasks.reobfJar.archiveFile.get().asFile)
+}
+
+ext.configFile = file "build.properties"
+configFile.withReader {
+    // Load config.  It shall from now be referenced as simply config or project.config
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
+// Integration Jar - Contains integration and transmission modules
+tasks.register('integrationJar', Jar) {
+    dependsOn tasks.reobfJar
+
+    from(project.ext.getJarFile) {
+        def patterns = [
+            "**/ProjectRedIntegration*.class",
+            "**/ProjectRedTransmission*.class",
+            "**/mrtjp/projectred/integration/**",
+            "**/mrtjp/projectred/transmission/**",
+            "**/assets/projectred/textures/blocks/integration/**",
+            "**/assets/projectred/textures/obj/integration/**",
+            "**/assets/projectred-integration/recipes/**",
+            "**/assets/projectred-transmission/recipes/**",
+            "integration_mod.info"
+        ]
+
+        include patterns
+        rename "integration_mod.info", "mcmod.info"
+
+        // Track what we've included for base jar exclusion
+        project.ext.baseExcludes.addAll(patterns)
+    }
+
+    archiveVersion = jarVer
+    archiveClassifier = "integration"
+}
+
+// Fabrication Jar - Contains fabrication module
+tasks.register('fabricationJar', Jar) {
+    dependsOn tasks.reobfJar
+
+    from(project.ext.getJarFile) {
+        def patterns = [
+            "**/ProjectRedFabrication*.class",
+            "**/mrtjp/projectred/fabrication/**",
+            "**/assets/projectred/cc_blockstates/fabrication/**",
+            "**/assets/projectred/textures/blocks/fabrication/**",
+            "**/assets/projectred/textures/items/fabrication/**",
+            "**/assets/projectred/textures/obj/fabrication/**",
+            "**/assets/projectred-fabrication/recipes/**",
+            "fabrication_mod.info"
+        ]
+
+        include patterns
+        rename "fabrication_mod.info", "mcmod.info"
+
+        project.ext.baseExcludes.addAll(patterns)
+    }
+
+    archiveVersion = jarVer
+    archiveClassifier = "fabrication"
+}
+
+// Lighting Jar - Contains illumination module
+tasks.register('lightingJar', Jar) {
+    dependsOn tasks.reobfJar
+
+    from(project.ext.getJarFile) {
+        def patterns = [
+            "**/ProjectRedIllumination*.class",
+            "**/mrtjp/projectred/illumination/**",
+            "**/assets/projectred/textures/blocks/lighting/**",
+            "**/assets/projectred/textures/obj/lighting/**",
+            "**/assets/projectred-illumination/recipes/**",
+            "lighting_mod.info"
+        ]
+
+        include patterns
+        rename "lighting_mod.info", "mcmod.info"
+
+        project.ext.baseExcludes.addAll(patterns)
+    }
+
+    archiveVersion = jarVer
+    archiveClassifier = "lighting"
+}
+
+// Mechanical Jar - Contains expansion, transportation, and relocation modules
+tasks.register('mechanicalJar', Jar) {
+    dependsOn tasks.reobfJar
+
+    from(project.ext.getJarFile) {
+        def patterns = [
+            "**/ProjectRedExpansion*.class",
+            "**/mrtjp/projectred/expansion/**",
+            "**/ProjectRedTransportation*.class",
+            "**/mrtjp/projectred/transportation/**",
+            "**/ProjectRedRelocation*.class",
+            "**/mrtjp/projectred/relocation/**",
+            "**/assets/projectred/cc_blockstates/mechanical/**",
+            "**/assets/projectred/textures/blocks/mechanical/**",
+            "**/assets/projectred/textures/items/mechanical/**",
+            "**/assets/projectred/textures/obj/mechanical/**",
+            "**/assets/projectred-expansion/recipes/**",
+            "**/assets/projectred-transportation/recipes/**",
+            "**/assets/projectred-relocation/recipes/**",
+            "mechanical_mod.info",
+            "**/projectred-relocation_at.cfg"
+        ]
+
+        include patterns
+        rename "mechanical_mod.info", "mcmod.info"
+
+        project.ext.baseExcludes.addAll(patterns)
+    }
+
+    manifest {
+        attributes "FMLAT": "projectred-relocation_at.cfg"
+    }
+
+    archiveVersion = jarVer
+    archiveClassifier = "mechanical"
+}
+
+// World Jar - Contains exploration module
+tasks.register('worldJar', Jar) {
+    dependsOn tasks.reobfJar
+
+    from(project.ext.getJarFile) {
+        def patterns = [
+            "**/ProjectRedExploration*.class",
+            "**/mrtjp/projectred/exploration/**",
+            "**/assets/projectred/cc_blockstates/world/**",
+            "**/assets/projectred/textures/blocks/world/**",
+            "**/assets/projectred/textures/items/world/**",
+            "**/assets/projectred-exploration/recipes/**",
+            "world_mod.info"
+        ]
+
+        include patterns
+        rename "world_mod.info", "mcmod.info"
+
+        project.ext.baseExcludes.addAll(patterns)
+    }
+
+    archiveVersion = jarVer
+    archiveClassifier = "world"
+}
+
+// Compat Jar - Contains compatibility module
+tasks.register('compatJar', Jar) {
+    dependsOn tasks.reobfJar
+
+    from(project.ext.getJarFile) {
+        def patterns = [
+            "**/ProjectRedCompatibility*.class",
+            "**/mrtjp/projectred/compatibility/**",
+            "**/assets/projectred/textures/blocks/compat/**",
+            "compat_mod.info"
+        ]
+
+        include patterns
+        rename "compat_mod.info", "mcmod.info"
+
+        project.ext.baseExcludes.addAll(patterns)
+    }
+
+    archiveVersion = jarVer
+    archiveClassifier = "compat"
+}
+
+// Base Jar - Contains everything not in other jars
+tasks.register('baseJar', Jar) {
+    dependsOn tasks.reobfJar
+
+    from(project.ext.getJarFile) {
+        exclude project.ext.baseExcludes
+        rename "base_mod.info", "mcmod.info"
+    }
+
+    archiveVersion = jarVer
+    archiveClassifier = "Base"
+}
+
+// Ensure base jar runs last since it excludes everything from other jars
+tasks.named('baseJar').configure {
+    mustRunAfter tasks.integrationJar, tasks.fabricationJar, tasks.lightingJar,
+                 tasks.mechanicalJar, tasks.worldJar, tasks.compatJar
+}
+
+// Disable empty directories in all jars
+tasks.withType(Jar) {
+    includeEmptyDirs = false
+}
+
+// Add all submod jars as artifacts
+artifacts {
+    archives tasks.integrationJar
+    archives tasks.fabricationJar
+    archives tasks.lightingJar
+    archives tasks.mechanicalJar
+    archives tasks.worldJar
+    archives tasks.compatJar
+    archives tasks.baseJar
+}

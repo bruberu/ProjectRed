@@ -48,7 +48,7 @@ class ItemPart extends ItemCore
 
     override def getUnlocalizedName(stack: ItemStack):String = {
         val col = PartDefs.fromMeta(stack.getItemDamage)
-        if (col != null) getUnlocalizedName() + "." + col.name
+        if (col != null) getTranslationKey() + "." + col.name
         else super.getUnlocalizedName(stack)
     }
 }

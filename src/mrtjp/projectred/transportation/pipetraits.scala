@@ -183,7 +183,6 @@ trait TRedstonePipe extends SubcorePipePart with TCenterRSAcquisitions with TCen
     override def calculateSignal:Int =
     {
         if (!hasRedstone) return 0
-        WirePropagator.setDustProvidePower(false)
         WirePropagator.redwiresProvidePower = false
         var s = 0
         def raise(sig:Int) {if (sig > s) s = sig}
@@ -191,7 +190,6 @@ trait TRedstonePipe extends SubcorePipePart with TCenterRSAcquisitions with TCen
         for (s <- 0 until 6) if (maskConnectsOut(s))
             raise(calcStraightSignal(s))
 
-        WirePropagator.setDustProvidePower(true)
         WirePropagator.redwiresProvidePower = true
         s
     }
@@ -449,7 +447,7 @@ trait TInventoryPipe[T <: AbstractPipePayload] extends PayloadPipePart[T] with I
 
     abstract override def discoverStraightOverride(s:Int):Boolean =
     {
-        InvWrapper.wrap(world, posOfStraight(s), EnumFacing.getFront(s^1)) match {
+        InvWrapper.wrap(world, posOfStraight(s), EnumFacing.byIndex(s^1)) match {
             case null => false
             case _ => true
         }
