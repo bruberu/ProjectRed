@@ -78,6 +78,7 @@ trait TArrayGatePart extends RedstoneGatePart with IRedwirePart with TFaceRSProp
         if (getLogicArray.overrideSignal(ipmask))
             return getLogicArray.calculateSignal(ipmask)
 
+        WirePropagator.setDustProvidePower(false)
         WirePropagator.redwiresProvidePower = false
         var s = 0
         def raise(sig:Int){ if (sig > s) s = sig }
@@ -88,6 +89,7 @@ trait TArrayGatePart extends RedstoneGatePart with IRedwirePart with TFaceRSProp
             else if (maskConnectsInside(r)) raise(calcInternalSignal(r))
             else raise(calcMaxSignal(r, false, true))
 
+        WirePropagator.setDustProvidePower(true)
         WirePropagator.redwiresProvidePower = true
         s
     }

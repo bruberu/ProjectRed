@@ -146,6 +146,7 @@ abstract class RedwirePart extends WirePart with TRedwireCommons with TFaceRSAcq
 
     override def calculateSignal =
     {
+        WirePropagator.setDustProvidePower(false)
         WirePropagator.redwiresProvidePower = false
         var s = 0
         def raise(sig:Int){ if (sig > s) s = sig }
@@ -161,6 +162,7 @@ abstract class RedwirePart extends WirePart with TRedwireCommons with TFaceRSAcq
         raise(calcUndersideSignal)
         if (maskConnectsCenter) raise(calcCenterSignal)
 
+        WirePropagator.setDustProvidePower(true)
         WirePropagator.redwiresProvidePower = true
         s
     }
@@ -200,6 +202,7 @@ abstract class FramedRedwirePart extends FramedWirePart with TRedwireCommons wit
     def calculateSignal =
     {
         WirePropagator.redwiresProvidePower = false
+        WirePropagator.setDustProvidePower(false)
         var s = 0
         def raise(sig:Int) {if (sig > s) s = sig}
 
@@ -210,6 +213,7 @@ abstract class FramedRedwirePart extends FramedWirePart with TRedwireCommons wit
         }
 
         WirePropagator.redwiresProvidePower = true
+        WirePropagator.setDustProvidePower(true)
         s
     }
 

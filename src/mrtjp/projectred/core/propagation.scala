@@ -5,7 +5,7 @@ import java.util.{Stack => JStack}
 import codechicken.multipart.handler.MultipartProxy
 import codechicken.multipart.{TMultiPart, TileMultipart}
 import com.google.common.collect.HashMultimap
-import net.minecraft.block.BlockRedstoneWire
+import mrtjp.projectred.core.mixin.MixinBlockRedstoneWire
 import net.minecraft.init.Blocks
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
@@ -14,6 +14,10 @@ import scala.collection.immutable.HashSet
 
 object WirePropagator
 {
+    def setDustProvidePower(b:Boolean)
+    {
+        Blocks.REDSTONE_WIRE.asInstanceOf[MixinBlockRedstoneWire].setCanProvidePower(b)
+    }
 
     private val rwConnectable = {val b = new ThreadLocal[Boolean]; b.set(true); b}
     def redwiresConnectable = rwConnectable.get
@@ -23,6 +27,7 @@ object WirePropagator
 
     def reset()
     {
+        setDustProvidePower(true)
         setRedwiresConnectable(true)
         redwiresProvidePower = true
     }

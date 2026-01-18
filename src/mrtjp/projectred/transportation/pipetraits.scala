@@ -183,6 +183,7 @@ trait TRedstonePipe extends SubcorePipePart with TCenterRSAcquisitions with TCen
     override def calculateSignal:Int =
     {
         if (!hasRedstone) return 0
+        WirePropagator.setDustProvidePower(false)
         WirePropagator.redwiresProvidePower = false
         var s = 0
         def raise(sig:Int) {if (sig > s) s = sig}
@@ -190,6 +191,7 @@ trait TRedstonePipe extends SubcorePipePart with TCenterRSAcquisitions with TCen
         for (s <- 0 until 6) if (maskConnectsOut(s))
             raise(calcStraightSignal(s))
 
+        WirePropagator.setDustProvidePower(true)
         WirePropagator.redwiresProvidePower = true
         s
     }

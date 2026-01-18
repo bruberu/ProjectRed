@@ -1,0 +1,12 @@
+{
+  "package": "mrtjp.projectred.core.mixin",
+  "refmap": "mixins.projectred.refmap.json",
+  "target": "@env(DEFAULT)",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "mrtjp.projectred.core.mixin.MixinBlockRedstoneWire"
+  ],
+  "client": [],
+  "server": []
+}
